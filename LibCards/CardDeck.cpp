@@ -1,14 +1,23 @@
 #include "CardDeck.h"
 namespace ft {
-CardDeck::CardDeck() :
-  _current_pos(0)
+
+  namespace {
+    const int CARDS_PER_DECK = 52;
+
+
+  }
+
+CardDeck::CardDeck(int numberOfDecks) :
+  _current_pos(0),
+  _numberOfDecks(numberOfDecks)
 {
-  int count = 0;
-  for(int suit = Card::Suit_Min; suit <= Card::Suit_Max; suit++) {
-    for(int val = Card::Value_Min; val <= Card::Value_Max; val++) {
-      card_ptr_t card_ptr(new Card(static_cast<Card::card_suit_t>(suit),
-            static_cast<Card::card_value_t>(val)));
-      _smart_cards.push_back(card_ptr);
+  for(int i = 0; i < _numberOfDecks; i++) {
+    for(int suit = Card::Suit_Min; suit <= Card::Suit_Max; suit++) {
+      for(int val = Card::Value_Min; val <= Card::Value_Max; val++) {
+        card_ptr_t card_ptr(new Card(static_cast<Card::card_suit_t>(suit),
+              static_cast<Card::card_value_t>(val)));
+        _cards.push_back(card_ptr);
+      }
     }
   }
 }
@@ -16,17 +25,18 @@ CardDeck::CardDeck() :
 void CardDeck::Shuffle() {
   _current_pos=0;
   srand(unsigned(time(NULL)));
-  std::random_shuffle(_smart_cards.begin(),_smart_cards.end());
+  std::random_shuffle(_cards.begin(),_cards.end());
 };
 
 void CardDeck::PrintOutAll() {
-  for(int i = 0; i < 52; i++) {
-    _smart_cards[i]->Print();
+  for(int i = 0; i < CARDS_PER_DECK*_numberOfDecks; i++) {
+    _cards[i]->Print();
   }
 }
 
 boost::shared_ptr<Card> CardDeck::GetNext() {
-  return _smart_cards[_current_pos++];
+  return _cards[_current_pos++];
 }
 
-}
+} //namespace ft
+

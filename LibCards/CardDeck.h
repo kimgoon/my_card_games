@@ -19,15 +19,15 @@ typedef boost::shared_ptr<CardDeck> carddeck_ptr_t;
 
 class CardDeck {
 public:
-  CardDeck();
+  CardDeck(int numberOfDecks = 1);
   void Shuffle();
   void PrintOutAll();
   card_ptr_t GetNext();
 
 private:
-  card_list_t _smart_cards;
-  card_list_it_t _pos;
+  card_list_t _cards;
   int _current_pos;
+  int _numberOfDecks;
 };
 
 }

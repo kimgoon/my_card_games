@@ -35,5 +35,3 @@ class Player : public ICardHandler {
 
 } //namespace ft
 
-
-
