@@ -8,7 +8,7 @@ practice using boost and c++ to implement some card games to make it intererstin
 
 What do I need?
 =============
-boost (currently using version 1.52)
+boost (currently using version 1.52)\n
 scons to build
 
 
