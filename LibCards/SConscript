@@ -1,9 +1,11 @@
+#set up the environment
 env = Environment()
 
 sources = ['CardDeck.cpp',
            'Card.cpp',
            'Player.cpp',
            'Dealer.cpp',
-           'BlackJackArena.cpp']
+           'BlackJackArena.cpp',
+           'BlackJackStatUtil.cpp']
 
 env.StaticLibrary('Cards', sources)

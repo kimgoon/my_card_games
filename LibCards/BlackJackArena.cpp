@@ -1,19 +1,29 @@
+#include <stdint.h>
 #include "BlackJackArena.h"
+
 
 namespace ft {
 
 namespace {
 const std::string& PLAYER_ACTION_MSG = "Player turn: (t/T to HIT; d/D to HOLD)";
+const int32_t INITIAL_CARD_DEAL_COUNT = 2;
+const int32_t BUST_VALUE = 22;
+const int32_t DEALER_SOFT_TGT = 17;
 
-}
+} //anonymous namespace
 
 BlackJackArena::BlackJackArena() :
   _player(new Player("sean")),
   _dealer(new Dealer()) {
+
+  _cardHandlers.push_back(_dealer);
+  _cardHandlers.push_back(_player);
 }
+
 
 bool BlackJackArena::StartGame() {
   cout << "BlackJackArena::StartGame game is starting..." << endl;
+  cout << "Dealer will try to hit soft " << DEALER_SOFT_TGT << endl;
 
   bool anotherRound = false;
   do {
@@ -29,67 +39,64 @@ bool BlackJackArena::StartGame() {
 
     cout << "Play another round? " << endl;
     char input;
-  cin >> input;
-  if(input == 'y' || input == 'Y')
-    anotherRound = true;
-  else
-    anotherRound = false;
+    cin >> input;
+    if(input == 'y' || input == 'Y')
+      anotherRound = true;
+    else
+      anotherRound = false;
   } while(anotherRound == true) ;
   return true;
 }
 
-void BlackJackArena::startRound() {
-
-
-  vector<int> values;
-  bool anotherRound = false;
-
+void BlackJackArena::startInitialDeal() {
+  std::cout << "Starting BlackJack Initial Deal" << endl;
   //reset the deck
   reset();
-  values.clear();
+  for(int i = 0; i < INITIAL_CARD_DEAL_COUNT; i++) {
+    for(cardhander_list_it_t it = _cardHandlers.begin(); it != _cardHandlers.end(); it++) {
+      (*it)->AcceptCard(_dealer->DealNextCard());
+    }
+  }
+}
+void BlackJackArena::printHand(const std::string& name, const card_list_t hand) {
+  cout << "******************** " << name << "'s HAND BEGIN **********************" << endl;
+  for(card_list_cit_t it = hand.begin(); it != hand.end(); it++) {
+    (*it)->Print();
+  }
+  cout << "********************* "<< name << "'s HAND END ***********************" << endl;
 
+}
+
+void BlackJackArena::startRound() {
+  startInitialDeal();
+
+  bool anotherRound = false;
   bool player_busted = false;
 
-  //deal cards
-
-  //start with player
-  _player->AcceptCard(_dealer->DealNextCard());
-  //dealer card
-  _dealer->AcceptCard(_dealer->DealNextCard());
-  //player card
-  _player->AcceptCard(_dealer->DealNextCard());
-  //dealer card
-  _dealer->AcceptCard(_dealer->DealNextCard());
-
   //show dealer's hand
-  cout << "Dealer is showing a:" << endl;
+  cout << "Dealer is showing a:";
   _dealer->Hand()[0]->Print();
+  cout << endl;
 
   char i = 'q';
-  int player_hand_val = 0;
+  int32_t player_hand_val = 0;
+  vector<int> values;
   do {
     //show player's hand
-    cout << "******************** PLAYER HAND BEGIN **********************" << endl;
-    const card_list_t& playersHand = _player->Hand();
-    for(card_list_cit_t it = playersHand.begin(); it != playersHand.end(); it++) {
-      (*it)->Print();
-    }
-    cout << "********************* PLAYER HAND END ***********************" << endl;
+    printHand("sean", _player->Hand());
 
-    getValue(playersHand, values);
+    getValue(_player->Hand(), values);
     for(vector<int>::iterator it = values.begin(); it != values.end(); it++) {
       cout << " value: " << *it << ", ";
-      if(it == values.begin() && *it > 21) {
+      if(it == values.begin() && *it >= BUST_VALUE) {
         player_hand_val = *it;
         player_busted = true;
       }
     }
     cout << endl;
 
-    if(player_busted == true) {
-      cout << "Player busted with value: " << player_hand_val << endl;
+    if(player_busted == true)
       break;
-    }
 
     //(loop)get player input
     bool unknownInput = true;
@@ -105,6 +112,7 @@ void BlackJackArena::startRound() {
         cout << "Player says HOLD..." << endl;
         unknownInput = false;
       }
+      cout << endl << endl << endl << endl;
 
       if(unknownInput == false)
         break;
@@ -113,30 +121,30 @@ void BlackJackArena::startRound() {
   while(i != 'd' && i != 'D');
 
   if(player_busted == true) {
+    cout << "Player busted with value: " << player_hand_val << endl;
     return;
   }
 
-  player_hand_val = values[0];
+  if(values.size() > 1 && values[1] < BUST_VALUE) {
+    player_hand_val = values[1];
+  }
+  else
+    player_hand_val = values[0];
+
   cout << "The value or your hand is: " << player_hand_val << endl;
 
-  //when done dealer gets cards
-  //add dealer logic
-  int dealer_hand_val = 0;
-  cout << "Dealer will try to hit soft 17" << endl;
+  //start dealer logic
+  int32_t dealer_hand_val = 0;
   for(;;) {
     bool tgtHitOrBust = false;
-    const card_list_t& dealersHand = _dealer->Hand();
     //show dealer's hand
-    cout << "******************** DEALER HAND BEGIN **********************" << endl;
-    for(card_list_cit_t it = dealersHand.begin(); it != dealersHand.end(); it++) {
-      (*it)->Print();
-    }
-    cout << "********************* DEALER HAND END ***********************" << endl;
-    getValue(dealersHand, values);
+    printHand("dealer", _dealer->Hand());
+    getValue(_dealer->Hand(), values);
 
+    cout << "value: ";
     for(vector<int>::iterator it = values.begin(); it != values.end(); it++) {
-      cout << "value: " << *it << ", ";
-      if(it == values.begin() && *it >= 17) {
+      cout << *it << ", ";
+      if(*it >= DEALER_SOFT_TGT) {
         tgtHitOrBust = true;
         dealer_hand_val = *it;
         break;
@@ -153,38 +161,37 @@ void BlackJackArena::startRound() {
     _dealer->AcceptCard(dealer_next_card);
   }
 
+  printRoundResults(player_hand_val, dealer_hand_val);
+}
+
+void BlackJackArena::printRoundResults(int32_t player_hand_val, int32_t dealer_hand_val) {
   //declare winner
-  if(dealer_hand_val > 21) {
-    cout << "Dealer busted, player wins" << endl;
+  cout << endl << "RESULT >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" << endl;
+  if(dealer_hand_val >= BUST_VALUE) {
+    cout << "^^^^^^^^^^^^^^^^^ Dealer busted, player wins ^^^^^^^^^^^^^^^^" << endl;
   }
   else if(dealer_hand_val < player_hand_val) {
+    cout << "^^^^^^^^^^^^^^^^^ Player wins ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^" << endl;
     cout << "Player wins with " << player_hand_val << " against dealer's "
       << dealer_hand_val << endl;
   }
   else if(dealer_hand_val > player_hand_val) {
+    cout << "^^^^^^^^^^^^^^^^^ Player loses  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^" << endl;
     cout << "Player loses with " << player_hand_val << " against dealer's "
       << dealer_hand_val << endl;
   }
   else {
+    cout << "^^^^^^^^^^^^^^^^^ PUSH^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^" << endl;
     cout << "PUSH!!!" << endl;
   }
-
-  cout
-    << "/**************************** END ROUND ********************************\n"
-    << "/***********************************************************************\n"
-    << endl;
+  cout << "RESULT >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" << endl << endl;
 }
 
-//#define DBG
 int BlackJackArena::getValue(const card_list_t& cards, vector<int>& values) {
   int numAces = 0;
   int handVal = 0;
   card_list_cit_t cit = cards.begin();
   values.clear();
-
-#ifdef DBG
-  std::cout << "BlackJackArena::getValue begin debug print for hand:" << std::endl;
-#endif
 
   for(; cit != cards.end(); cit++) {
     Card::card_value_t val = (*cit)->Value();
@@ -194,19 +201,7 @@ int BlackJackArena::getValue(const card_list_t& cards, vector<int>& values) {
       handVal += 10;
     else
       handVal += (int)val + 2;
-
-#ifdef DBG
-    (*cit)->Print();
-    std::cout << "current hand value:" << handVal << std::endl;
-    if(numAces > 0) {
-      std::cout << " w/ ace count: " << numAces << std::endl;
-    }
-#endif
   }
-
-#ifdef DBG
-  std::cout << "BlackJackArena::getValue end debug print for hand" << std::endl;
-#endif
 
   if(numAces == 0) {
     values.push_back(handVal);

@@ -1,4 +1,5 @@
 #pragma once
+#include "Card.h"
 
 
 namespace ft {
@@ -6,12 +7,12 @@ namespace ft {
 class BlackJackStatUtil {
 public:
   BlackJackStatUtil(int numDecks = 1) :
-    _numDecks(numDeck)
+    _numDecks(numDecks)
   {
   }
 
+  double GetBustPercentage(card_list_t dealerHand, card_list_t playerHand);
   double GetBlackJackPercentage();
-  double GetBustPercentage();
 
 
   private:
