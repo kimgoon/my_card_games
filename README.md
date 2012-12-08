@@ -5,13 +5,10 @@ What is this?
 =============
 practice using boost and c++ to implement some card games to make it interersting
 
-
 What do I need?
 =============
-boost (currently using version 1.52)\n
-scons to build
-
-
+- boost (currently using version 1.52)
+- scons to build
 
 Etc:
 =============
