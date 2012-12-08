@@ -2,10 +2,14 @@
 #grab the current environment
 env = Environment()
 
-SConscript('LibCards/SConscript')
+
+SConscript('LibCards/SConscript', variant_dir='bin')
+
+#set up compiler flags
+env.Append(CCFLAGS = '-g')
 
 #set up the lib paths and include paths
-env.Append(LIBPATH=['LibCards/'])
+env.Append(LIBPATH=['bin'])
 env.Append(CPPPATH=['LibCards/'])
 env.Append(LIBS=['Cards'])
 

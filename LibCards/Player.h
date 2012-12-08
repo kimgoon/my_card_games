@@ -25,6 +25,8 @@ class Player : public ICardHandler {
     const card_list_t& Hand() const;
     int HandCount();
 
+    char GetPlayerAction(const std::string& msg);
+
     //Player properties
     std::string Name() const;
 

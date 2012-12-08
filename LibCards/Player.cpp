@@ -23,6 +23,15 @@ int Player::HandCount() {
   return _hand.size();
 }
 
+char Player::GetPlayerAction(const std::string& msg) {
+  std::cout << msg << std::endl;
+
+  char input;
+  std::cin >> input;
+
+  return input;
+}
+
 std::string Player::Name() const {
   return _name;
 }

@@ -25,7 +25,7 @@ class Card {
 public:
   enum card_suit_t {
     Suit_Min = 0,
-    Suit_Clover = Suit_Min,
+    Suit_Clubs = Suit_Min,
     Suit_Diamond,
     Suit_Heart,
     Suit_Spade,

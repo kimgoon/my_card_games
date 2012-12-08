@@ -1,6 +1,8 @@
 #include <iostream>
 #include <vector>
 
+#include <boost/scoped_ptr.hpp>
+
 #include "CardDeck.h"
 #include "Player.h"
 #include "BlackJackArena.h"
@@ -10,7 +12,7 @@ using namespace ft;
 int main() {
   std::cout << "Testing BlackJackArena class" << std::endl;
 
-  boost::shared_ptr<BlackJackArena> arena(new BlackJackArena());
+  boost::scoped_ptr<BlackJackArena> arena(new BlackJackArena());
 
 
   arena->StartGame();
